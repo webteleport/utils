@@ -1,4 +1,4 @@
-# WebTeleport
+# WebTeleport Utils
 
 [![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white)](https://pkg.go.dev/github.com/webteleport/utils?tab=doc)
 [![Go 1.18+](https://img.shields.io/github/go-mod/go-version/webteleport/utils)](https://golang.org/dl/)
