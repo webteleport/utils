@@ -1,4 +1,4 @@
-package webteleport
+package utils
 
 import (
 	"fmt"
