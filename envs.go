@@ -30,6 +30,20 @@ func EnvPort(fallback string) string {
 	return fallback
 }
 
+func EnvTCPPort(fallback string) string {
+	if port, ok := os.LookupEnv("TCP_PORT"); ok {
+		return ":" + port
+	}
+	return fallback
+}
+
+func EnvUDPPort(fallback string) string {
+	if port, ok := os.LookupEnv("UDP_PORT"); ok {
+		return ":" + port
+	}
+	return fallback
+}
+
 func EnvAltSvc(fallback string) string {
 	if altsvc, ok := os.LookupEnv("ALT_SVC"); ok {
 		return altsvc
