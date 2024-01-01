@@ -57,3 +57,20 @@ func EnvUI(fallback string) string {
 	}
 	return fallback
 }
+
+func LookupEnv(key string) *string {
+	v, ok := os.LookupEnv(key)
+	if !ok {
+		return nil
+	}
+	return &v
+}
+
+func LookupEnvPort(key string) *string {
+	v := LookupEnv(key)
+	if v == nil {
+		return nil
+	}
+	p := ":" + *v
+	return &p
+}
