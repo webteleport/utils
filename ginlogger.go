@@ -44,13 +44,13 @@ var defaultLogFormatter = func(param LogFormatterParams) string {
 	if param.Latency > time.Minute {
 		param.Latency = param.Latency.Truncate(time.Second)
 	}
-	return fmt.Sprintf("[GIN] %v |%s %3d %s| %13v | %15s | %15s |%s %-7s %s %#v\n",
+	return fmt.Sprintf("[GIN] %v |%s %3d %s| %13v |%s %-7s %s| %15s | %15s %#v\n",
 		param.TimeStamp.Format("2006/01/02 - 15:04:05"),
 		statusColor, param.StatusCode, resetColor,
 		param.Latency,
-		param.Host,
-		param.ClientIP,
 		methodColor, param.Method, resetColor,
+		param.ClientIP,
+		param.Host,
 		param.Path,
 	)
 }
