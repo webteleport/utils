@@ -87,6 +87,8 @@ func (p *LogFormatterParams) MethodColor() string {
 	method := p.Method
 
 	switch method {
+	case http.MethodConnect:
+		return white
 	case http.MethodGet:
 		return blue
 	case http.MethodPost:
