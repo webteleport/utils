@@ -15,7 +15,6 @@ type GinLogger struct {
 	formatter LogFormatter
 	logWriter io.Writer
 	skipPaths []string
-	isTerm    bool
 }
 
 type LogFormatter func(params LogFormatterParams) string
@@ -26,17 +25,17 @@ type LogFormatterParams struct {
 	StatusCode   int
 	Latency      time.Duration
 	ClientIP     string
+	Host         string
 	Method       string
 	Path         string
 	ErrorMessage string
-	isTerm       bool
 	BodySize     int
 	Keys         map[string]interface{}
 }
 
 var defaultLogFormatter = func(param LogFormatterParams) string {
 	var statusColor, methodColor, resetColor string
-	if param.isTerm {
+	if param.IsOutputColor() {
 		statusColor = param.StatusCodeColor()
 		methodColor = param.MethodColor()
 		resetColor = param.ResetColor()
@@ -45,10 +44,11 @@ var defaultLogFormatter = func(param LogFormatterParams) string {
 	if param.Latency > time.Minute {
 		param.Latency = param.Latency.Truncate(time.Second)
 	}
-	return fmt.Sprintf("[GIN] %v |%s %3d %s| %13v | %15s |%s %-7s %s %#v\n",
+	return fmt.Sprintf("[GIN] %v |%s %3d %s| %13v | %15s | %15s |%s %-7s %s %#v\n",
 		param.TimeStamp.Format("2006/01/02 - 15:04:05"),
 		statusColor, param.StatusCode, resetColor,
 		param.Latency,
+		param.Host,
 		param.ClientIP,
 		methodColor, param.Method, resetColor,
 		param.Path,
@@ -111,7 +111,7 @@ func (p *LogFormatterParams) ResetColor() string {
 }
 
 func (p *LogFormatterParams) IsOutputColor() bool {
-	return p.isTerm
+	return isatty.IsTerminal(os.Stdin.Fd()) && isatty.IsTerminal(os.Stdout.Fd())
 }
 
 type LogWriter struct {
@@ -127,18 +127,11 @@ func GinLoggerMiddleware(next http.Handler) http.Handler {
 	logWriter := &LogWriter{writer: os.Stdout}
 	skipPaths := make([]string, 0)
 
-	isTerm := true
-	if w, ok := logWriter.writer.(*os.File); !ok || os.Getenv("TERM") == "dumb" ||
-		(!isatty.IsTerminal(w.Fd()) && !isatty.IsCygwinTerminal(w.Fd())) {
-		isTerm = false
-	}
-
 	return &GinLogger{
 		next:      next,
 		formatter: formatter,
 		logWriter: logWriter,
 		skipPaths: skipPaths,
-		isTerm:    isTerm,
 	}
 }
 
@@ -155,6 +148,7 @@ func (m *GinLogger) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			TimeStamp:  time.Now(),
 			Latency:    time.Since(start),
 			ClientIP:   getClientIP(r),
+			Host:       r.Host,
 			Method:     r.Method,
 			StatusCode: getStatus(w),
 			Path:       path,
