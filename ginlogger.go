@@ -5,7 +5,10 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strconv"
+	"strings"
 	"time"
+	"unicode"
 
 	"github.com/mattn/go-isatty"
 )
@@ -27,6 +30,7 @@ type LogFormatterParams struct {
 	ClientIP     string
 	Host         string
 	Method       string
+	Proto        string
 	Path         string
 	ErrorMessage string
 	BodySize     int
@@ -44,15 +48,41 @@ var defaultLogFormatter = func(param LogFormatterParams) string {
 	if param.Latency > time.Minute {
 		param.Latency = param.Latency.Truncate(time.Second)
 	}
-	return fmt.Sprintf("[GIN] %v |%s %3d %s| %13v |%s %-7s %s| %15s | %15s %#v\n",
-		param.TimeStamp.Format("2006/01/02 - 15:04:05"),
+	return fmt.Sprintf("%v |%s %3d %s| %8v |%s %-7s %s| %8s | %15s | %20s | %#v\n",
+		param.TimeStamp.Format("2006/01/02 15:04:05"),
 		statusColor, param.StatusCode, resetColor,
-		param.Latency,
+		formatDuration(param.Latency),
 		methodColor, param.Method, resetColor,
+		param.Proto,
 		param.ClientIP,
 		param.Host,
 		param.Path,
 	)
+}
+
+func formatDuration(duration time.Duration) string {
+	// Convert the duration to a string
+	durationStr := duration.String()
+
+	// Find the index of the first non-digit character
+	index := strings.IndexFunc(durationStr, func(r rune) bool {
+		return unicode.IsLetter(r)
+	})
+
+	// Extract the numeric value and unit
+	valueStr := durationStr[:index]
+	unitStr := durationStr[index:]
+
+	// Parse the value part as a float64
+	value, _ := strconv.ParseFloat(valueStr, 64)
+
+	// Format the value with 2 decimal places
+	formattedValue := fmt.Sprintf("%.2f", value)
+
+	// Combine the formatted value and unit back into a string
+	formattedDuration := formattedValue + unitStr
+
+	return formattedDuration
 }
 
 const (
@@ -152,6 +182,7 @@ func (m *GinLogger) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			ClientIP:   getClientIP(r),
 			Host:       r.Host,
 			Method:     r.Method,
+			Proto:      r.Proto,
 			StatusCode: getStatus(w),
 			Path:       path,
 		}
