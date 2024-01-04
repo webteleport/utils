@@ -171,8 +171,9 @@ func (m *GinLogger) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 	path := r.URL.Path
 	raw := r.URL.RawQuery
+	iw := &Interceptor{ResponseWriter: w, StatusCode: http.StatusOK}
 
-	m.next.ServeHTTP(w, r)
+	m.next.ServeHTTP(iw, r)
 
 	if !m.shouldSkipPath(path) {
 		param := LogFormatterParams{
@@ -183,7 +184,7 @@ func (m *GinLogger) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			Host:       r.Host,
 			Method:     r.Method,
 			Proto:      r.Proto,
-			StatusCode: getStatus(w),
+			StatusCode: iw.StatusCode,
 			Path:       path,
 		}
 
@@ -214,12 +215,4 @@ func getClientIP(r *http.Request) string {
 		}
 	}
 	return clientIP
-}
-
-func getStatus(w http.ResponseWriter) int {
-	// Retrieve the status code from the response writer
-	if ww, ok := w.(interface{ StatusCode() int }); ok {
-		return ww.StatusCode()
-	}
-	return http.StatusOK
 }

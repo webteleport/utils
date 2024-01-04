@@ -12,7 +12,7 @@ func InterceptMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Println("RequestURI:", r.RequestURI)
 		log.Println("RequestHeader", r.Header)
-		iw := &Interceptor{ResponseWriter: w}
+		iw := &Interceptor{ResponseWriter: w, StatusCode: http.StatusOK}
 		r.Body = &Body{r.Body, os.Stderr}
 		next.ServeHTTP(iw, r)
 		log.Println("StatusCode:", iw.StatusCode)
