@@ -8,12 +8,12 @@ import (
 
 // ReverseProxy
 //
-// - upstream: http://user:pass@example.com
-//   behavior: use upstream credential by default
-// - upstream: http://example.com
-//   behavior: passthrough client credential if any
-// - upstream: http://-@example.com
-//   behavior: don't pass any credential to upstream
+//   - upstream: http://user:pass@example.com
+//     behavior: use upstream credential by default
+//   - upstream: http://example.com
+//     behavior: passthrough client credential if any
+//   - upstream: http://-@example.com
+//     behavior: don't pass any credential to upstream
 func ReverseProxy(addr string) http.Handler {
 	upstream, err := url.Parse(addr)
 	if err != nil {
