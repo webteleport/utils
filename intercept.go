@@ -1,8 +1,10 @@
 package utils
 
 import (
+	"bufio"
 	"io"
 	"log"
+	"net"
 	"net/http"
 	"os"
 )
@@ -20,14 +22,24 @@ func InterceptMiddleware(next http.Handler) http.Handler {
 	})
 }
 
+func (w *Interceptor) Hijack() (net.Conn, *bufio.ReadWriter, error) {
+	conn, rw, err := w.ResponseWriter.(http.Hijacker).Hijack()
+	if err == nil && w.StatusCode == 0 {
+		// The status will be StatusSwitchingProtocols if there was no error and
+		// WriteHeader has not been called yet
+		w.StatusCode = http.StatusSwitchingProtocols
+	}
+	return conn, rw, err
+}
+
 type Interceptor struct {
 	http.ResponseWriter
 	StatusCode int
 }
 
 func (w *Interceptor) WriteHeader(statusCode int) {
-	w.StatusCode = statusCode
 	w.ResponseWriter.WriteHeader(statusCode)
+	w.StatusCode = statusCode
 }
 
 type Body struct {

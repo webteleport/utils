@@ -171,9 +171,15 @@ func (m *GinLogger) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 	path := r.URL.Path
 	raw := r.URL.RawQuery
-	iw := &Interceptor{ResponseWriter: w, StatusCode: http.StatusOK}
+	iw := &Interceptor{ResponseWriter: w}
 
 	m.next.ServeHTTP(iw, r)
+
+	status := iw.StatusCode
+
+	if status == 0 {
+		status = 200
+	}
 
 	if !m.shouldSkipPath(path) {
 		param := LogFormatterParams{
@@ -184,7 +190,7 @@ func (m *GinLogger) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			Host:       r.Host,
 			Method:     r.Method,
 			Proto:      r.Proto,
-			StatusCode: iw.StatusCode,
+			StatusCode: status,
 			Path:       path,
 		}
 
