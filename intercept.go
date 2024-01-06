@@ -22,6 +22,12 @@ func InterceptMiddleware(next http.Handler) http.Handler {
 	})
 }
 
+func (w *Interceptor) Flush() {
+	if flusher, ok := w.ResponseWriter.(http.Flusher); ok {
+		flusher.Flush()
+	}
+}
+
 func (w *Interceptor) Hijack() (net.Conn, *bufio.ReadWriter, error) {
 	conn, rw, err := w.ResponseWriter.(http.Hijacker).Hijack()
 	if err == nil && w.StatusCode == 0 {
