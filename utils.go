@@ -5,11 +5,9 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	"os"
 	"strings"
 
 	"github.com/ebi-yade/altsvc-go"
-	"github.com/mattn/go-isatty"
 	"golang.org/x/net/idna"
 )
 
@@ -89,7 +87,7 @@ func Hyperlink(name, url string) string {
 
 // MaybeHyperlink turns input into ANSI hyperlink when stdin is a tty
 func MaybeHyperlink(l string) string {
-	if isatty.IsTerminal(os.Stdin.Fd()) && isatty.IsTerminal(os.Stdout.Fd()) {
+	if Isatty() {
 		return Hyperlink(l, l)
 	}
 	return l

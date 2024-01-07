@@ -9,8 +9,6 @@ import (
 	"strings"
 	"time"
 	"unicode"
-
-	"github.com/mattn/go-isatty"
 )
 
 type GinLogger struct {
@@ -143,7 +141,7 @@ func (p *LogFormatterParams) ResetColor() string {
 }
 
 func (p *LogFormatterParams) IsOutputColor() bool {
-	return isatty.IsTerminal(os.Stdin.Fd()) && isatty.IsTerminal(os.Stdout.Fd())
+	return Isatty()
 }
 
 type LogWriter struct {
