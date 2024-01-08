@@ -3,13 +3,44 @@ package utils
 import (
 	"fmt"
 	"log"
-	"net/http"
 	"net/url"
 	"strings"
 
 	"github.com/ebi-yade/altsvc-go"
+	"github.com/miekg/dns"
 	"golang.org/x/net/idna"
 )
+
+func LookupHostTXT(domain, server string) ([]string, error) {
+	answers := []string{}
+
+	// Create a new DNS client
+	client := dns.Client{}
+
+	// Create a new DNS message
+	message := dns.Msg{}
+	message.SetQuestion(dns.Fqdn(domain), dns.TypeTXT)
+
+	// Send the DNS query
+	response, _, err := client.Exchange(&message, server)
+	if err != nil {
+		return answers, fmt.Errorf("DNS query failed: %w\n", err)
+	}
+
+	// Process the DNS response
+	if response.Rcode != dns.RcodeSuccess {
+		return answers, fmt.Errorf("DNS query failed with response code: %s\n", dns.RcodeToString[response.Rcode])
+	}
+
+	// Extract and print the TXT records
+	for _, answer := range response.Answer {
+		if txt, ok := answer.(*dns.TXT); ok {
+			// fmt.Printf("TXT record: %s\n", txt.Txt[0])
+			answers = append(answers, txt.Txt[0])
+		}
+	}
+	return answers, nil
+}
 
 // ExtractURLPort returns the :port part from URL.Host (host[:port])
 //
@@ -35,17 +66,11 @@ func ToIdna(s string) string {
 
 // ExtractAltSvcH3Endpoints reads Alt-Svc header
 // returns a list of [host]:port endpoints
-func ExtractAltSvcEndpoints(h http.Header, protocolId string) []string {
-	line := h.Get("Alt-Svc")
-	if line == "" {
-		return nil
-	}
+func ExtractAltSvcEndpoints(line string, protocolId string) (results []string) {
 	svcs, err := altsvc.Parse(line)
 	if err != nil {
-		log.Println(err)
-		return nil
+		return
 	}
-	results := []string{}
 	for _, svc := range svcs {
 		if svc.ProtocolID != protocolId {
 			continue
@@ -54,7 +79,7 @@ func ExtractAltSvcEndpoints(h http.Header, protocolId string) []string {
 		ep := svc.AltAuthority.Host + ":" + svc.AltAuthority.Port
 		results = append(results, ep)
 	}
-	return results
+	return
 }
 
 // Graft returns Host(base):Port(alt)
