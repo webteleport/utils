@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"strings"
 )
 
 // ReverseProxy
@@ -15,6 +16,11 @@ import (
 //   - upstream: http://-@example.com
 //     behavior: don't pass any credential to upstream
 func ReverseProxy(addr string) http.Handler {
+	// google.com will be parsed as URL{Path: google.com} without an explicit protocol
+	// hence the hack
+	if !strings.Contains(addr, "://") {
+		addr = "http://" + addr
+	}
 	upstream, err := url.Parse(addr)
 	if err != nil {
 		panic(err)
