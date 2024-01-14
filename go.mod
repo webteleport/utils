@@ -7,6 +7,7 @@ require (
 	github.com/gorilla/handlers v1.5.2
 	github.com/mattn/go-isatty v0.0.20
 	github.com/miekg/dns v1.1.57
+	github.com/rs/cors v1.10.1
 	golang.org/x/exp v0.0.0-20240103183307-be819d1f06fc
 	golang.org/x/net v0.19.0
 )
