@@ -47,8 +47,13 @@ func ReverseProxy(addr string) http.Handler {
 			r.Out.SetBasicAuth(user, pass)
 		}
 	}
+	modify := func(r *http.Response) error {
+		r.Header.Del("Content-Security-Policy")
+		return nil
+	}
 	rp := &httputil.ReverseProxy{
-		Rewrite: rewrite,
+		Rewrite:        rewrite,
+		ModifyResponse: modify,
 	}
 	return rp
 }
