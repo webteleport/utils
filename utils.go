@@ -35,8 +35,8 @@ func LookupHostTXT(domain, server string) ([]string, error) {
 	// Extract and print the TXT records
 	for _, answer := range response.Answer {
 		if txt, ok := answer.(*dns.TXT); ok {
-			// fmt.Printf("TXT record: %s\n", txt.Txt[0])
-			answers = append(answers, txt.Txt[0])
+			a := strings.ReplaceAll(txt.Txt[0], `\`, "")
+			answers = append(answers, a)
 		}
 	}
 	return answers, nil
@@ -64,7 +64,7 @@ func ToIdna(s string) string {
 	return ascii
 }
 
-// ExtractAltSvcH3Endpoints reads Alt-Svc header
+// ExtractAltSvcH3Endpoints reads Alt-Svc value
 // returns a list of [host]:port endpoints
 func ExtractAltSvcEndpoints(line string, protocolId string) (results []string) {
 	svcs, err := altsvc.Parse(line)
