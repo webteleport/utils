@@ -4,8 +4,14 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"regexp"
 	"strings"
 )
+
+func isPort(s string) bool {
+	match, _ := regexp.MatchString(`^:\d{1,5}$`, s)
+	return match
+}
 
 // ReverseProxy
 //
@@ -16,6 +22,9 @@ import (
 //   - upstream: http://-@example.com
 //     behavior: don't pass any credential to upstream
 func ReverseProxy(addr string) http.Handler {
+	if isPort(addr) {
+		addr = "localhost" + addr
+	}
 	// google.com will be parsed as URL{Path: google.com} without an explicit protocol
 	// hence the hack
 	if !strings.Contains(addr, "://") {
