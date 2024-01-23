@@ -8,6 +8,19 @@ import (
 	"strings"
 )
 
+// AsURL expands :port and hostname to http://localhost:port & http://hostname respectively
+func AsURL(s string) string {
+	if isPort(s) {
+		s = "localhost" + s
+	}
+	// google.com will be parsed as URL{Path: google.com} without an explicit protocol
+	// hence the hack
+	if !strings.Contains(s, "://") {
+		s = "http://" + s
+	}
+	return s
+}
+
 func isPort(s string) bool {
 	match, _ := regexp.MatchString(`^:\d{1,5}$`, s)
 	return match
@@ -22,14 +35,7 @@ func isPort(s string) bool {
 //   - upstream: http://-@example.com
 //     behavior: don't pass any credential to upstream
 func ReverseProxy(addr string) http.Handler {
-	if isPort(addr) {
-		addr = "localhost" + addr
-	}
-	// google.com will be parsed as URL{Path: google.com} without an explicit protocol
-	// hence the hack
-	if !strings.Contains(addr, "://") {
-		addr = "http://" + addr
-	}
+	addr = AsURL(addr)
 	upstream, err := url.Parse(addr)
 	if err != nil {
 		panic(err)
