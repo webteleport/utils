@@ -1,15 +1,25 @@
 package utils
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net/url"
 	"strings"
 
-	"github.com/ebi-yade/altsvc-go"
 	"github.com/miekg/dns"
 	"golang.org/x/net/idna"
 )
+
+func UnwrapInnermost(err error) error {
+	for {
+		unwrapped := errors.Unwrap(err)
+		if unwrapped == nil {
+			return err
+		}
+		err = unwrapped
+	}
+}
 
 func LookupHostTXT(domain, server string) ([]string, error) {
 	answers := []string{}
@@ -62,24 +72,6 @@ func ToIdna(s string) string {
 		return s
 	}
 	return ascii
-}
-
-// ExtractAltSvcH3Endpoints reads Alt-Svc value
-// returns a list of [host]:port endpoints
-func ExtractAltSvcEndpoints(line string, protocolId string) (results []string) {
-	svcs, err := altsvc.Parse(line)
-	if err != nil {
-		return
-	}
-	for _, svc := range svcs {
-		if svc.ProtocolID != protocolId {
-			continue
-		}
-		// host could be empty, port must not
-		ep := svc.AltAuthority.Host + ":" + svc.AltAuthority.Port
-		results = append(results, ep)
-	}
-	return
 }
 
 // Graft returns Host(base):Port(alt)

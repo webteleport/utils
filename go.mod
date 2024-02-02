@@ -3,7 +3,6 @@ module github.com/webteleport/utils
 go 1.21.6
 
 require (
-	github.com/ebi-yade/altsvc-go v0.1.1
 	github.com/gorilla/handlers v1.5.2
 	github.com/mattn/go-isatty v0.0.20
 	github.com/miekg/dns v1.1.58
