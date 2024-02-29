@@ -30,8 +30,8 @@ func EnvPort(fallback string) string {
 	return fallback
 }
 
-func EnvTCPPort(fallback string) string {
-	if port, ok := os.LookupEnv("TCP_PORT"); ok {
+func EnvHTTPPort(fallback string) string {
+	if port, ok := os.LookupEnv("HTTP_PORT"); ok {
 		return ":" + port
 	}
 	return fallback
