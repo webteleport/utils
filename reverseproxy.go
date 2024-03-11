@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"os"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -43,6 +44,11 @@ func ReverseProxy(addr string) http.Handler {
 	rewrite := func(r *httputil.ProxyRequest) {
 		r.SetURL(upstream)
 		r.SetXForwarded()
+
+		// passthrough Host from client
+		if os.Getenv("PASS_HOST") != "" {
+			r.Out.Host = r.In.Host
+		}
 
 		// ignore credential when default upstream user set to -
 		if upstream.User.String() == "-" {
