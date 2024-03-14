@@ -209,14 +209,18 @@ func (m *GinLogger) shouldSkipPath(path string) bool {
 	return false
 }
 
-func getClientIP(r *http.Request) string {
+func getClientIP(r *http.Request) (clientIP string) {
 	// Retrieve the client IP address from the request headers
-	clientIP := r.Header.Get("X-Real-IP")
-	if clientIP == "" {
-		clientIP = r.Header.Get("X-Forwarded-For")
-		if clientIP == "" {
-			clientIP = r.RemoteAddr
+	for _, x := range []string{
+		r.Header.Get("X-Envoy-External-Address"),
+		r.Header.Get("X-Real-IP"),
+		r.Header.Get("X-Forwarded-For"),
+		r.RemoteAddr,
+	} {
+		if x != "" {
+			clientIP = x
+			break
 		}
 	}
-	return clientIP
+	return
 }
