@@ -1,10 +1,12 @@
 package utils
 
 import (
-	"os"
+	"io"
+	"log"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"os"
 	"regexp"
 	"strings"
 )
@@ -75,6 +77,15 @@ func ReverseProxy(addr string) http.Handler {
 	rp := &httputil.ReverseProxy{
 		Rewrite:        rewrite,
 		ModifyResponse: modify,
+		ErrorLog:       ReverseProxyLogger(),
 	}
+
 	return rp
+}
+
+func ReverseProxyLogger() *log.Logger {
+	if os.Getenv("REVERSEPROXY_LOG") == "" {
+		return log.New(io.Discard, "", 0) // discard logger
+	}
+	return nil // default logger
 }
