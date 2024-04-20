@@ -184,7 +184,7 @@ func (m *GinLogger) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			Request:    r,
 			TimeStamp:  time.Now(),
 			Latency:    time.Since(start),
-			ClientIP:   getClientIP(r),
+			ClientIP:   RealIP(r),
 			Host:       r.Host,
 			Method:     r.Method,
 			Proto:      r.Proto,
@@ -207,20 +207,4 @@ func (m *GinLogger) shouldSkipPath(path string) bool {
 		}
 	}
 	return false
-}
-
-func getClientIP(r *http.Request) (clientIP string) {
-	// Retrieve the client IP address from the request headers
-	for _, x := range []string{
-		r.Header.Get("X-Envoy-External-Address"),
-		r.Header.Get("X-Real-IP"),
-		r.Header.Get("X-Forwarded-For"),
-		r.RemoteAddr,
-	} {
-		if x != "" {
-			clientIP = x
-			break
-		}
-	}
-	return
 }

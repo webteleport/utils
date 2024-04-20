@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net"
+	"net/http"
 	"net/url"
 	"strings"
 
@@ -125,4 +127,31 @@ func ParseDomainCandidates(p string) []string {
 		list = append(list, dom)
 	}
 	return list
+}
+
+func StripPort(hostport string) string {
+	// use net.SplitHostPort instead of strings.Split
+	// because it can handle ipv6 addresses
+	host, _, err := net.SplitHostPort(hostport)
+	if err != nil {
+		// if there is no port, just return the input
+		return hostport
+	}
+	return host
+}
+
+func RealIP(r *http.Request) (clientIP string) {
+	// Retrieve the client IP address from the request headers
+	for _, x := range []string{
+		r.Header.Get("X-Envoy-External-Address"),
+		r.Header.Get("X-Real-IP"),
+		r.Header.Get("X-Forwarded-For"),
+		StripPort(r.RemoteAddr),
+	} {
+		if x != "" {
+			clientIP = x
+			break
+		}
+	}
+	return
 }
