@@ -54,16 +54,6 @@ func LookupHostTXT(domain, server string) ([]string, error) {
 	return answers, nil
 }
 
-// ExtractURLPort returns the :port part from URL.Host (host[:port])
-//
-// An empty string is returned if no port is found
-func ExtractURLPort(u *url.URL) string {
-	if u == nil {
-		return ""
-	}
-	return ExtractPort(u.Host)
-}
-
 // ToIdna converts a string to its idna form at best effort
 // Should only be used on the hostname part without port
 func ToIdna(s string) string {
@@ -128,13 +118,26 @@ func ParseDomainCandidates(p string) []string {
 	return list
 }
 
+// ExtractURLPort returns the :port part from URL.Host (host[:port])
+//
+// An empty string is returned if no port is found or input is nil
+func ExtractURLPort(u *url.URL) string {
+	if u == nil {
+		return ""
+	}
+	return ExtractPort(u.Host)
+}
+
+// ExtractPort returns the :port part from host[:port]
+//
+// An empty string is returned if no port is found
 func ExtractPort(hostport string) string {
 	_, port, err := net.SplitHostPort(hostport)
 	if err != nil {
 		// if there is no port, just return ""
 		return hostport
 	}
-	return port
+	return fmt.Sprintf(":%s", port)
 }
 
 func StripPort(hostport string) string {
