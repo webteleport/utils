@@ -89,3 +89,25 @@ func ReverseProxyLogger() *log.Logger {
 	}
 	return nil // default logger
 }
+
+// TransparentProxy is a reverse proxy that preserves the original Host header
+func TransparentProxy(addr string) http.Handler {
+	addr = AsURL(addr)
+	upstream, err := url.Parse(addr)
+	if err != nil {
+		panic(err)
+	}
+	rewrite := func(r *httputil.ProxyRequest) {
+		r.SetURL(upstream)
+		r.SetXForwarded()
+
+		// passthrough Host from client
+		r.Out.Host = r.In.Host
+	}
+	rp := &httputil.ReverseProxy{
+		Rewrite:  rewrite,
+		ErrorLog: ReverseProxyLogger(),
+	}
+
+	return rp
+}
