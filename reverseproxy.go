@@ -83,13 +83,6 @@ func ReverseProxy(addr string) http.Handler {
 	return rp
 }
 
-func ReverseProxyLogger() *log.Logger {
-	if os.Getenv("REVERSEPROXY_LOG") == "" {
-		return log.New(io.Discard, "", 0) // discard logger
-	}
-	return nil // default logger
-}
-
 // TransparentProxy is a reverse proxy that preserves the original Host header
 func TransparentProxy(addr string) http.Handler {
 	addr = AsURL(addr)
@@ -110,4 +103,18 @@ func TransparentProxy(addr string) http.Handler {
 	}
 
 	return rp
+}
+
+func ReverseProxyLogger() *log.Logger {
+	if os.Getenv("REVERSEPROXY_LOG") == "" {
+		return log.New(io.Discard, "", 0) // discard logger
+	}
+	return nil // default logger
+}
+
+func LoggedReverseProxy(rt http.RoundTripper) *httputil.ReverseProxy {
+	return &httputil.ReverseProxy{
+		Transport: rt,
+		ErrorLog:  ReverseProxyLogger(),
+	}
 }
