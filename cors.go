@@ -24,7 +24,7 @@ var AllowAllCorsMiddleware = func(next http.Handler) http.Handler {
 				http.MethodPatch,
 				http.MethodDelete,
 			},
-			AllowedHeaders:   []string{"*"},
+			AllowedHeaders:   []string{"Content-Type", "Authorization", "Accept", "Origin", "X-Requested-With"},
 			AllowCredentials: true,
 		})
 
