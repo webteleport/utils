@@ -105,36 +105,6 @@ func TransparentProxy(addr string) http.Handler {
 	return rp
 }
 
-// ProxyProxy is a reverse proxy that preserves the original Host header and proxy-* hop-by-hop headers
-func ProxyProxy(addr string) http.Handler {
-	addr = AsURL(addr)
-	upstream, err := url.Parse(addr)
-	if err != nil {
-		panic(err)
-	}
-	rewrite := func(r *httputil.ProxyRequest) {
-		r.SetURL(upstream)
-		r.SetXForwarded()
-
-		// passthrough Host from client
-		r.Out.Host = r.In.Host
-
-		// Manually preserve headers
-		if v := r.In.Header.Get("Proxy-Authorization"); v != "" {
-			r.Out.Header.Set("Proxy-Authorization", v)
-		}
-		if v := r.In.Header.Get("Proxy-Connection"); v != "" {
-			r.Out.Header.Set("Proxy-Connection", v)
-		}
-	}
-	rp := &httputil.ReverseProxy{
-		Rewrite:  rewrite,
-		ErrorLog: ReverseProxyLogger(),
-	}
-
-	return rp
-}
-
 func ReverseProxyLogger() *log.Logger {
 	if os.Getenv("REVERSEPROXY_LOG") == "" {
 		return log.New(io.Discard, "", 0) // discard logger
