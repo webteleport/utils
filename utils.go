@@ -160,7 +160,9 @@ func RealIP(r *http.Request) (clientIP string) {
 		StripPort(r.RemoteAddr),
 	} {
 		if x != "" {
-			clientIP = x
+			// Some headers (e.g. X-Forwarded-For) may contain a comma-separated
+			// list of IPs; the leftmost is the original client IP.
+			clientIP = strings.TrimSpace(strings.SplitN(x, ",", 2)[0])
 			break
 		}
 	}
