@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -201,10 +202,5 @@ func (m *GinLogger) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (m *GinLogger) shouldSkipPath(path string) bool {
-	for _, p := range m.skipPaths {
-		if p == path {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(m.skipPaths, path)
 }
