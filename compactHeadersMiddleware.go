@@ -2,8 +2,7 @@ package utils
 
 import (
 	"net/http"
-
-	"golang.org/x/exp/slices"
+	"slices"
 )
 
 func CompactHeadersMiddleware(next http.Handler, keys []string) http.Handler {
