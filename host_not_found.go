@@ -1,11 +1,14 @@
 package utils
 
 import (
+	"log"
 	"net/http"
 	"text/template"
 )
 
 const NOT_FOUND_TEMPLATE = `Not found: {{.Host}}`
+
+var hostNotFoundTmpl = template.Must(template.New("HostNotFound").Parse(NOT_FOUND_TEMPLATE))
 
 type NotFoundData struct {
 	Host string
@@ -13,12 +16,13 @@ type NotFoundData struct {
 
 func HostNotFoundHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		tmpl := template.Must(template.New("HostNotFound").Parse(NOT_FOUND_TEMPLATE))
 		data := NotFoundData{
 			Host: r.Host,
 		}
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		w.WriteHeader(http.StatusNotFound)
-		tmpl.Execute(w, data)
+		if err := hostNotFoundTmpl.Execute(w, data); err != nil {
+			log.Printf("HostNotFoundHandler: template execute error: %v", err)
+		}
 	})
 }
