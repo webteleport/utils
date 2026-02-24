@@ -47,6 +47,9 @@ func LookupHostTXT(domain, server string) ([]string, error) {
 	// Extract and print the TXT records
 	for _, answer := range response.Answer {
 		if txt, ok := answer.(*dns.TXT); ok {
+			if len(txt.Txt) == 0 {
+				continue
+			}
 			a := strings.ReplaceAll(txt.Txt[0], `\`, "")
 			answers = append(answers, a)
 		}
