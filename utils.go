@@ -135,7 +135,7 @@ func ExtractPort(hostport string) string {
 	_, port, err := net.SplitHostPort(hostport)
 	if err != nil {
 		// if there is no port, just return ""
-		return hostport
+		return ""
 	}
 	return fmt.Sprintf(":%s", port)
 }
