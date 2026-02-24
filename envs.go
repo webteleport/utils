@@ -2,25 +2,25 @@ package utils
 
 import "os"
 
-func EnvCert(fallback string) string {
-	if cert, ok := os.LookupEnv("CERT"); ok {
-		return cert
+// EnvOr returns the value of the environment variable named by key,
+// or fallback if the variable is not set.
+func EnvOr(key, fallback string) string {
+	if val, ok := os.LookupEnv(key); ok {
+		return val
 	}
 	return fallback
+}
+
+func EnvCert(fallback string) string {
+	return EnvOr("CERT", fallback)
 }
 
 func EnvKey(fallback string) string {
-	if key, ok := os.LookupEnv("KEY"); ok {
-		return key
-	}
-	return fallback
+	return EnvOr("KEY", fallback)
 }
 
 func EnvHost(fallback string) string {
-	if host, ok := os.LookupEnv("HOST"); ok {
-		return host
-	}
-	return fallback
+	return EnvOr("HOST", fallback)
 }
 
 func EnvPort(fallback string) string {
@@ -45,17 +45,11 @@ func EnvUDPPort(fallback string) string {
 }
 
 func EnvAltSvc(fallback string) string {
-	if altsvc, ok := os.LookupEnv("ALT_SVC"); ok {
-		return altsvc
-	}
-	return fallback
+	return EnvOr("ALT_SVC", fallback)
 }
 
 func EnvUI(fallback string) string {
-	if ui, ok := os.LookupEnv("UI"); ok {
-		return ui
-	}
-	return fallback
+	return EnvOr("UI", fallback)
 }
 
 func LookupEnv(key string) *string {
