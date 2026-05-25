@@ -3,14 +3,10 @@ package utils
 import (
 	"errors"
 	"fmt"
-	"log"
 	"net"
 	"net/http"
 	"net/url"
 	"strings"
-
-	"github.com/miekg/dns"
-	"golang.org/x/net/idna"
 )
 
 func UnwrapInnermost(err error) error {
@@ -21,48 +17,6 @@ func UnwrapInnermost(err error) error {
 		}
 		err = unwrapped
 	}
-}
-
-func LookupHostTXT(domain, server string) ([]string, error) {
-	answers := []string{}
-
-	// Create a new DNS client
-	client := dns.Client{}
-
-	// Create a new DNS message
-	message := dns.Msg{}
-	message.SetQuestion(dns.Fqdn(domain), dns.TypeTXT)
-
-	// Send the DNS query
-	response, _, err := client.Exchange(&message, server)
-	if err != nil {
-		return answers, fmt.Errorf("DNS query failed: %w\n", err)
-	}
-
-	// Process the DNS response
-	if response.Rcode != dns.RcodeSuccess {
-		return answers, fmt.Errorf("DNS query failed with response code: %s\n", dns.RcodeToString[response.Rcode])
-	}
-
-	// Extract and print the TXT records
-	for _, answer := range response.Answer {
-		if txt, ok := answer.(*dns.TXT); ok {
-			a := strings.ReplaceAll(txt.Txt[0], `\`, "")
-			answers = append(answers, a)
-		}
-	}
-	return answers, nil
-}
-
-// ToIdna converts a string to its idna form at best effort
-// Should only be used on the hostname part without port
-func ToIdna(s string) string {
-	ascii, err := idna.ToASCII(s)
-	if err != nil {
-		log.Println(err)
-		return s
-	}
-	return ascii
 }
 
 // Graft returns Host(base):Port(alt)
